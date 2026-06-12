@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="description"
+        content="Flow Reversal Steering (FRS) improves generalist flow-matching robot policies via zero-shot semantic steering, DSBC distillation, and DSRL bootstrapping.">
+  <meta name="keywords" content="FRS, Flow Reversal Steering, VLA, VLM, DSRL, DSBC, flow matching, robotics">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Improving Robotic Generalist Policies via Flow Reversal Steering</title>
+
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro"
+        rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;700&display=swap"
+        rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+
+  <link rel="stylesheet" href="./static/css/bulma.min.css">
+  <link rel="stylesheet" href="./static/css/fontawesome.all.min.css">
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  <link rel="stylesheet" href="./static/css/index.css">
+  <link rel="icon" href="./static/images/favicon.svg">
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script defer src="./static/js/fontawesome.all.min.js"></script>
+  <script src="./static/js/index.js"></script>
+</head>
+<body>
+
+<nav id="toc-nav" aria-label="Section navigation">
+  <a class="toc-item" href="#frs"><span class="toc-dot-wrap"><span class="toc-dot"></span></span><span class="toc-label">FRS</span></a>
+  <a class="toc-item" href="#zero-shot"><span class="toc-dot-wrap"><span class="toc-dot"></span></span><span class="toc-label">Zero-Shot</span></a>
+  <a class="toc-item" href="#dsbc"><span class="toc-dot-wrap"><span class="toc-dot"></span></span><span class="toc-label">DSBC</span></a>
+  <a class="toc-item" href="#dsrl"><span class="toc-dot-wrap"><span class="toc-dot"></span></span><span class="toc-label">DSRL + FRS</span></a>
+</nav>
+
+
+<section class="hero">
+  <div class="hero-body">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column has-text-centered">
+
+          <h2 class="subtitle is-3 publication-subtitle">Improving Robotic Generalist Policies via</h2>
+          <h1 class="title is-1 publication-title">Flow Reversal Steering</h1>
+          
+          <div class="is-size-5 publication-authors">
+            <span class="author-block"><a href="https://www.linkedin.com/in/andyytang/" target="_blank" rel="noopener">Andy Tang</a><sup>*1</sup>,</span>
+            <span class="author-block"><a href="https://verityw.github.io/" target="_blank" rel="noopener">William Chen</a><sup>*2</sup>,</span>
+            <span class="author-block"><a href="https://wagenmaker.github.io/" target="_blank" rel="noopener">Andrew Wagenmaker</a><sup>2</sup>,</span>
+            <span class="author-block"><a href="https://ai.stanford.edu/~cbfinn/" target="_blank" rel="noopener">Chelsea Finn</a><sup>1</sup>,</span>
+            <span class="author-block"><a href="https://people.eecs.berkeley.edu/~svlevine/" target="_blank" rel="noopener">Sergey Levine</a><sup>2</sup></span>
+          </div>
+
+          <div class="is-size-5 publication-authors">
+            <span class="author-block"><sup>1</sup>Stanford University,</span>
+            <span class="author-block"><sup>2</sup>UC Berkeley</span>
+            <span class="author-block"><sup>*</sup>Equal contribution</span>
+          </div>
+
+          <div class="column has-text-centered">
+            <div class="publication-links">
+              <span class="link-block">
+                <a href="./static/Flow_Reversal_Steering.pdf" target="_blank" rel="noopener" class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon"><i class="fas fa-file-pdf"></i></span>
+                  <span>Paper</span>
+                </a>
+              </span>
+              <span class="link-block">
+                <span class="external-link button is-normal is-rounded is-dark is-disabled-coming-soon">
+                  <span class="icon"><i class="ai ai-arxiv"></i></span>
+                  <span>arXiv (Coming soon)</span>
+                </span>
+              </span>
+              <span class="link-block">
+                <a href="#overview-video" class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon"><i class="fab fa-youtube"></i></span>
+                  <span>Video</span>
+                </a>
+              </span>
+              <span class="link-block">
+                <span class="external-link button is-normal is-rounded is-dark is-disabled-coming-soon">
+                  <span class="icon"><i class="fab fa-github"></i></span>
+                  <span>Code (Coming soon)</span>
+                </span>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section class="section overview-video-section" id="overview-video">
+  <div class="container is-max-desktop">
+    <div class="video-toggle-wrapper">
+      <div class="video-wrapper">
+        <video id="overview-video-preview" class="overview-video" controls autoplay muted loop playsinline>
+          <source src="./static/videos/section_vids/0_Preview.mp4" type="video/mp4"> 
+        </video>
+        <video id="overview-video-full" class="overview-video is-hidden" controls playsinline>
+          <source src="./static/videos/section_vids/0_Preview.mp4" type="video/mp4"> <!-- TODO: video for full -->
+        </video>
+      </div>
+      <div class="toggle-container">
+        <input type="checkbox" id="video-toggle" aria-label="Switch between muted preview and narrated full video">
+        <label for="video-toggle" class="video-mode-slider">
+          <span class="toggle-label off">Preview</span>
+          <span class="toggle-label on">Full</span>
+        </label>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Abstract</h2>
+        <div class="content has-text-justified">
+          <p>
+             Generalist policies can learn a wide range of skills from diverse robot datasets. In order to solve or improve on challenging news tasks, we need a way to infer and invoke the appropriate actions from the policy's rich behavioral prior, especially when directly commanding the policy fails. We focus on flow matching generalists and propose <strong>Flow Reversal Steering (FRS)</strong>: a method that takes suboptimal but "reasonable" actions, finds their latent noises by passing them through the flow policy in reverse, and maps them to nearby generalist action modes. We evaluate FRS across many simulated and real-world manipulation settings. First, FRS can turn coarse semantic guidance from humans or vision-language models (VLMs) into corresponding good robot actions, improving zero-shot control. These gains can be distilled with behavioral cloning by training an auxiliary policy to output noises that the generalist maps to good actions &mdash; showing up to 95% absolute task success rate boosts in under a minute of training. Finally, FRS enables policy improvement by bootstrapping reinforcement learning with semantic knowledge, improving on several tasks that standard RL fails to improve on.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 has-text-centered" id="frs">Flow Reversal Steering (FRS)</h2>
+
+
+    <style>
+      .teaser-row { display: flex; align-items: stretch; gap: 14px; margin-bottom: 0.5rem; }
+      .teaser-img-col { flex: 1203 1 0; min-width: 0; display: flex; flex-direction: column; }
+      .teaser-img { width: 100%; height: auto; aspect-ratio: 1203 / 903; display: block; }
+      .teaser-caption { flex: 1 1 auto; display: flex; align-items: center; justify-content: center;
+        text-align: center; font-size: 0.9rem; color: #555; margin: 0; padding: 0.5rem 0.25rem 0; }
+      .teaser-anim-col { flex: 903 1 0; min-width: 0; display: flex; flex-direction: column; }
+      .frs1d-stage { position: relative; width: 100%; aspect-ratio: 1 / 1; box-sizing: border-box;
+        border: 3px solid #a4a6a6; border-radius: 4px; background: #fff; overflow: hidden; }
+      .frs1d-canvas { width: 100%; height: 100%; display: block; }
+      .frs1d-popup {
+        position: absolute; background: #f2f2f2; border: 2px solid #7f7f7f;
+        border-radius: 0; padding: 0.4em 0.55em; font-family: 'Roboto Mono', monospace;
+        font-size: 0.8rem; line-height: 1.25; color: #555555; text-align: center;
+        opacity: 0; transition: opacity 0.1s linear; pointer-events: none; z-index: 3;
+      }
+      .frs1d-popup em { color: #3f9a47; font-style: italic; font-weight: 500; }
+      .frs1d-tri { position: absolute; transform: translateX(-50%); text-align: center;
+        cursor: pointer; z-index: 4; padding: 2px 8px; }
+      .frs1d-tri-shape { display: block; margin: 0 auto; width: 2px; height: 14px;
+        background: #c2c2c2; transform-origin: center top; transition: transform 0.1s linear; }
+      .frs1d-tri-label { display: block; position: relative; left: 0.2em; margin-top: 3px; color: #c2c2c2; line-height: 1; }
+      .frs1d-ticks { position: relative; height: 18px; margin-top: 2px; }
+      .frs1d-tick { position: absolute; transform: translateX(-50%); text-align: center; }
+      .frs1d-tickline { display: block; width: 1px; height: 5px; background: #999; margin: 0 auto; }
+      .frs1d-ticklabel { display: block; font-family: 'Roboto Mono', monospace; font-size: 0.66rem; color: #777; line-height: 1.2; }
+      .frs1d-controls { display: flex; align-items: center; gap: 0.7rem; justify-content: center; margin-top: 0.6rem; }
+      .frs1d-play {
+        cursor: pointer; border: 1px solid #c9c9c9; background: #fff; border-radius: 6px;
+        padding: 0.32rem 0.8rem; font-size: 0.9rem; font-weight: 600; color: #333; min-width: 7rem;
+        font-family: 'Roboto Mono', monospace; text-align: center;
+      }
+      .frs1d-play:hover { background: #f0f0f0; }
+      .frs1d-readout { font-family: 'Roboto Mono', monospace; font-variant-numeric: tabular-nums; font-weight: 700; color: #333; }
+      .frs1d-sliderwrap { margin-top: 0.4rem; }
+      .frs1d-slider { display: block; width: 100%; height: 16px; background: transparent; cursor: pointer; -webkit-appearance: none; appearance: none; }
+      .frs1d-slider::-webkit-slider-runnable-track { height: 5px; background: #dcdcdc; border-radius: 3px; }
+      .frs1d-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; margin-top: -5.5px; border-radius: 50%; background: #7a6db0; cursor: pointer; }
+      .frs1d-slider::-moz-range-track { height: 5px; background: #dcdcdc; border-radius: 3px; }
+      .frs1d-slider::-moz-range-thumb { width: 16px; height: 16px; border: none; border-radius: 50%; background: #7a6db0; cursor: pointer; }
+      .frs1d-halflabels { display: flex; margin-top: 0.3rem; font-family: 'Roboto Mono', monospace; }
+      .frs1d-halflabels .half { flex: 1 1 50%; text-align: center; font-size: 0.72rem; font-weight: 700; }
+      .frs1d-halflabels .half.noise { color: #6a4fa3; }
+      .frs1d-halflabels .half.denoise { color: #2f7d97; border-left: 1px solid #e0e0e0; }
+      @media (max-width: 640px) { .teaser-row { flex-direction: column; } .teaser-img-col, .teaser-anim-col { flex: 1 1 auto; width: 100%; } }
+    </style>
+
+    <div class="teaser-row">
+      <div class="teaser-img-col">
+        <img class="teaser-img"
+             src="./static/images/figures/TeaserSmall.png"
+             alt="Flow Reversal Steering: a coarse reference action from a reasoner is reversed through the flow field into latent noise, then denoised into a precise in-distribution action.">
+        <p class="teaser-caption">FRS passes coarse reference actions through a flow policy in reverse, finding latent noises which map to precise actions from a nearby behavioral mode.</p>
+      </div>
+      <div class="teaser-anim-col">
+        <div id="frs1d-stage" class="frs1d-stage">
+          <canvas id="frs1d-canvas" class="frs1d-canvas"></canvas>
+          <div class="frs1d-popup" id="frs1d-pop1">The reasoner picks a <em>coarse action</em> &hellip;</div>
+          <div class="frs1d-popup" id="frs1d-pop2">&hellip;which finds a <em>good part of noise space</em>&hellip;</div>
+          <div class="frs1d-popup" id="frs1d-pop3">&hellip;and maps to a <em>good precise action mode</em></div>
+          <div class="frs1d-tri" id="frs1d-tri1"><span class="frs1d-tri-shape"></span><span class="frs1d-tri-label frs1d-kx" data-tex="a_1"></span></div>
+          <div class="frs1d-tri" id="frs1d-tri2"><span class="frs1d-tri-shape"></span><span class="frs1d-tri-label frs1d-kx" data-tex="\hat{a}_0"></span></div>
+          <div class="frs1d-tri" id="frs1d-tri3"><span class="frs1d-tri-shape"></span><span class="frs1d-tri-label frs1d-kx" data-tex="\hat{a}_1"></span></div>
+        </div>
+        <div class="frs1d-controls">
+          <button type="button" id="frs1d-play" class="frs1d-play">&#9654; Play</button>
+          <span class="frs1d-readout">t = <span id="frs1d-tval">1.00</span></span>
+        </div>
+        <div class="frs1d-sliderwrap">
+          <input type="range" id="frs1d-slider" class="frs1d-slider"
+                 min="0" max="1000" value="0" step="1" aria-label="diffusion time t">
+          <div class="frs1d-ticks" id="frs1d-ticks"></div>
+          <div class="frs1d-halflabels">
+            <span class="half noise">Noise via flow reversal</span>
+            <span class="half denoise">Denoise via flow matching</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="content has-text-justified">
+      <p>
+        Generalist flow-matching robot policies learn a rich prior over behaviors. These policies contain many skills needed for novel tasks &mdash; provided these appropriate behaviors are elicited. How can we use semantic knowledge to steer generalist policies towards sampling "reasonable" actions for new tasks?
+      </p>
+      <p>
+        We thus propose <strong>Flow Reversal Steering (FRS)</strong>: a method for guiding generalist flow policies' action sampling by finding underlying noises that map to semantically-reasonable behaviors.
+        By passing a coarse reference action &mdash; which captures roughly how the robot should move  &mdash;  through the flow policy in reverse, FRS finds the noise which approximately maps to the action. When subsequently denoised, <i>FRS effectively finds a nearby good behavioral mode from the generalist's prior that is similar to the reference</i>.
+      </p>
+
+      <style>
+        .codecompare { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 0.75rem 0 1.5rem; }
+        .codeblock { border: 1px solid #e2e2e6; border-radius: 10px; overflow: hidden; background: #fbfbfc;
+          display: flex; flex-direction: column; }
+        .codeblock-title { font-family: 'Roboto Mono', monospace; font-weight: 700; font-size: 0.85rem;
+          padding: 0.55rem 0.9rem; border-bottom: 1px solid #ececf0; }
+        .codeblock-title.std { background: #eef1f6; color: #41566b; }
+        .codeblock-title.frs { background: #efe9f7; color: #6a4fa3; font-variant: normal; }
+        .codeblock pre { margin: 0; padding: 0.85rem 1rem; flex: 1; font-family: 'Roboto Mono', monospace;
+          font-size: 0.8rem; line-height: 1.6; color: #2c2c2c; overflow-x: auto; white-space: pre; }
+        .codeblock .cm { color: #9298a0; font-style: italic; }
+        .codeblock .rev { color: #6a4fa3; }
+        @media (max-width: 768px) { .codecompare { grid-template-columns: 1fr; } }
+      </style>
+      <div class="codecompare">
+        <div class="codeblock">
+          <div class="codeblock-title std">Standard Flow Denoising</div>
+<pre>
+<span class="cm"># Sample action from flow policy (K integration steps)</span>
+x ~ N(0, I)                  <span class="cm"># Sample noise</span>
+dt ← 1 / K
+for t in 0 … 1:              <span class="cm"># K forward steps, size dt</span>
+    x ← x + dt·vθ(x, t)
+return x                     <span class="cm"># action sample</span></pre>
+        </div>
+        <div class="codeblock">
+          <div class="codeblock-title frs">Flow Reversal Steering</div>
+<pre>
+<span class="cm"># Steer w/ reference action a_ref (K integration steps)</span>
+<span class="rev">x ← a_ref</span>
+dt ← 1 / K
+<span class="rev">for t = 1 … 0:</span>               <span class="cm"># reverse the flow → noise</span>
+    <span class="rev">x ← x − dt·vθ(x, t)</span>
+for t = 0 … 1:               <span class="cm"># denoise → nearby mode</span>
+    x ← x + dt·vθ(x, t)
+return x                     <span class="cm"># refined, in-distribution</span></pre>
+        </div>
+      </div>
+
+      <p>
+        In turn, this allows semantic reasoners, like humans or VLMs, to guide the policy towards task-relevant good behaviors. The noises and actions produced by FRS can also be used for policy learning and improvement, especially via noise-space behavioral cloning and reinforcement learning.
+      </p>
+
+      <br>
+      <img class="figure-full"
+           src="./static/images/figures/Overview.png"
+           alt="Overview of the Flow Reversal Steering pipeline.">
+      <p class="figure-caption has-text-centered">Overview of the FRS pipeline.</p>
+      <p>
+        We demonstrate <span class="frs">FRS</span> using state-of-the-art <a href="https://arxiv.org/abs/2504.16054">π<sub>0.5</sub> vision-language-action models (VLAs)</a> in both simulated <a href="https://libero-project.github.io/main.html">LIBERO</a> and real-world <a href="https://droid-dataset.github.io/">DROID</a> manipulation tasks. We present three ways to use <span class="frs">FRS</span>:
+      </p>
+      <ol>
+        <li>
+          <a href="#zero-shot"><strong>Zero-shot <span class="frs">FRS</span></strong></a>: directly execute the refined actions <span class="frs">FRS</span> elicits from coarse human or VLM guidance, with no additional training.
+        </li>
+        <li>
+          <a href="#dsbc"><strong>Diffusion Steering via Behavioral Cloning (DSBC)</strong></a>: distill good noises from flow reversal into a noise policy using supervised learning.
+        </li>
+        <li>
+          <a href="#dsrl"><strong>Diffusion Steering via Reinforcement Learning (DSRL) + <span class="frs">FRS</span></strong></a>: bootstrap noise-space reinforcement learning with <span class="frs">FRS</span> rollouts.
+        </li>
+      </ol>
+
+    </div>
+
+    <style>
+      #frs-rt-widget { margin-top: 1.5rem; }
+      .frs-rt-details { border: 1px solid #dcdcdc; border-radius: 8px; background: #fbfbfc; }
+      .frs-rt-summary {
+        cursor: pointer; padding: 0.85rem 1.1rem; font-weight: 700;
+        font-family: 'Google Sans', 'Noto Sans', sans-serif; color: #2b2b2b;
+        list-style: none; user-select: none;
+      }
+      .frs-rt-summary::-webkit-details-marker { display: none; }
+      .frs-rt-summary::before { content: "\25B8"; display: inline-block; margin-right: 0.6rem; transition: transform 0.15s ease; color: #888; }
+      .frs-rt-details[open] .frs-rt-summary::before { transform: rotate(90deg); }
+      .frs-rt-summary:hover { color: #000; }
+      .frs-rt-body { padding: 0.4rem 1.1rem 1.2rem; }
+      .frs-rt-caption { font-size: 0.92rem; color: #444; text-align: justify; margin-bottom: 1rem; }
+      .frs-rt-canvases { display: flex; gap: 1.1rem; justify-content: center; flex-wrap: wrap; }
+      .frs-rt-fig { margin: 0; flex: 1 1 300px; max-width: 360px; text-align: center; }
+      .frs-rt-fig figcaption {
+        font-weight: 700; font-size: 0.95rem; margin-bottom: 0.4rem; color: #333;
+        font-family: 'Roboto Mono', monospace;
+      }
+      .frs-rt-canvas { width: 100%; aspect-ratio: 1 / 1; display: block; border: 2px solid #a4a6a6; border-radius: 4px; background: #fff; }
+      .frs-rt-controls { display: flex; align-items: center; gap: 0.85rem; justify-content: center; flex-wrap: wrap; margin-top: 1.1rem; }
+      .frs-rt-play {
+        cursor: pointer; border: 1px solid #c9c9c9; background: #fff; border-radius: 6px;
+        padding: 0.32rem 0.8rem; font-size: 0.9rem; font-weight: 600; color: #333; min-width: 7rem;
+        font-family: 'Roboto Mono', monospace; text-align: center;
+      }
+      .frs-rt-play:hover { background: #f0f0f0; }
+      .frs-rt-readout { font-family: 'Roboto Mono', monospace; font-variant-numeric: tabular-nums; font-weight: 700; color: #333; min-width: 64px; }
+      .frs-rt-sliderwrap { max-width: 560px; margin: 0.55rem auto 0; }
+      .frs-rt-slider { display: block; width: 100%; height: 16px; background: transparent; cursor: pointer; -webkit-appearance: none; appearance: none; }
+      .frs-rt-slider::-webkit-slider-runnable-track { height: 5px; background: #dcdcdc; border-radius: 3px; }
+      .frs-rt-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; margin-top: -5.5px; border-radius: 50%; background: #7a6db0; cursor: pointer; }
+      .frs-rt-slider::-moz-range-track { height: 5px; background: #dcdcdc; border-radius: 3px; }
+      .frs-rt-slider::-moz-range-thumb { width: 16px; height: 16px; border: none; border-radius: 50%; background: #7a6db0; cursor: pointer; }
+      .frs-rt-halflabels { display: flex; margin-top: 0.34rem; font-family: 'Roboto Mono', monospace; }
+      .frs-rt-halflabels .half { flex: 1 1 50%; text-align: center; font-size: 0.8rem; font-weight: 700; }
+      .frs-rt-halflabels .half.noise { color: #6a4fa3; }
+      .frs-rt-halflabels .half.denoise { color: #2f7d97; border-left: 1px solid #e0e0e0; }
+      .frs-rt-ticks { position: relative; height: 20px; margin-top: 3px; }
+      .frs-rt-tick { position: absolute; transform: translateX(-50%); text-align: center; }
+      .frs-rt-tickline { display: block; width: 1px; height: 5px; background: #999; margin: 0 auto; }
+      .frs-rt-ticklabel { display: block; font-size: 0.76rem; color: #888; line-height: 1.3; font-variant-numeric: tabular-nums; font-family: 'Roboto Mono', monospace; }
+    </style>
+
+    <div id="frs-rt-widget">
+      <details id="frs-rt-details" class="frs-rt-details">
+        <summary class="frs-rt-summary">Noising with Flow Reversal vs. Forward Diffusion Process</summary>
+        <div class="frs-rt-body">
+          <div class="frs-rt-canvases">
+            <figure class="frs-rt-fig">
+              <figcaption>Flow Reversal</figcaption>
+              <canvas id="frs-rt-reversal" class="frs-rt-canvas"></canvas>
+            </figure>
+            <figure class="frs-rt-fig">
+              <figcaption>Forward Diffusion</figcaption>
+              <canvas id="frs-rt-forward" class="frs-rt-canvas"></canvas>
+            </figure>
+          </div>
+          <div class="frs-rt-controls">
+            <button type="button" id="frs-rt-play" class="frs-rt-play">&#9654; Play</button>
+            <span class="frs-rt-readout">t = <span id="frs-rt-tval">1.00</span></span>
+          </div>
+          <div class="frs-rt-sliderwrap">
+            <input type="range" id="frs-rt-slider" class="frs-rt-slider"
+                   min="0" max="1000" value="0" step="1" aria-label="diffusion time t">
+            <div class="frs-rt-ticks" id="frs-rt-ticks"></div>
+            <div class="frs-rt-halflabels">
+              <span class="half noise">Noising &middot; t: 1 &rarr; 0</span>
+              <span class="half denoise">Denoising &middot; t: 0 &rarr; 1</span>
+            </div>
+          </div>
+          <p class="frs-rt-caption">
+            <strong>Flow reversal</strong> maps data to noise by integrating the flow field backward in time. As flow matching learns a deterministic velocity field, there is a fixed correspondence between noise and data, so the resulting noises denoise back to the original data points.
+          </p>
+          <p class="frs-rt-caption">
+            In contrast, the <strong>forward diffusion process</strong> linearly interpolates data with Gaussian noise. While this yields the same marginal distributions as flow matching at all times, it does not preserve the exact data-noise correspondence, so the noised points do not necessarily denoise back to the original data.
+          </p>
+        </div>
+      </details>
+    </div>
+
+    <style>
+      .isv-body { padding: 0.4rem 1.1rem 1.2rem; }
+      .isv-caption { font-size: 0.92rem; color: #444; text-align: justify; margin-bottom: 1.1rem; }
+      .isv-task { margin-top: 1.3rem; }
+      .isv-task:first-of-type { margin-top: 0.4rem; }
+      .isv-task-title { font-weight: 700; font-size: 0.95rem; color: #333; margin-bottom: 0.45rem;
+        font-family: 'Google Sans', 'Noto Sans', sans-serif; }
+      .isv-task-title .tid { color: #7a6db0; }
+      .isv-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.1rem; }
+      .isv-pair { display: grid; grid-template-columns: 1fr; gap: 0.35rem; }   /* image on top, plotly below */
+      .isv-pair img, .isv-pair iframe { width: 100%; aspect-ratio: 1 / 1; display: block;
+        border: 1px solid #d8d8d8; border-radius: 4px; background: #fff; }
+      @media (max-width: 768px) { .isv-row { grid-template-columns: 1fr; } }
+    </style>
+
+    <div id="isv-widget" style="margin-top: 1.5rem;">
+      <details id="isv-details" class="frs-rt-details">
+        <summary class="frs-rt-summary">Interactive Examples of Flow Reversal Steering</summary>
+        <div class="isv-body">
+          <p class="isv-caption">
+            Example LIBERO frames with an interactive 3D view of the cardinal flow-reversal steering directions (arrows) and the resulting steered action chunks (dots). Black dots represent a sample from the VLA without steering, showing that the steered actions do differ from what the VLA usually would output. Three frames are shown per task across the rollout. All actions and steering are done with a π<sub>0.5</sub> VLA.
+          </p>
+        <div class="isv-task">
+          <div class="isv-task-title"><span class="tid">Task 13</span> &mdash; put the black bowl at the front on the plate</div>
+          <div class="isv-row">
+          <div class="isv-pair"><img src="./static/images/interactive_steering_vis/13--put_the_black_bowl_at_the_front_on_the_plate--23--0015.png" loading="lazy" alt="put the black bowl at the front on the plate (frame 0015)"><iframe src="./static/images/interactive_steering_vis/13--put_the_black_bowl_at_the_front_on_the_plate--23--0015.html" loading="lazy" title="put the black bowl at the front on the plate (frame 0015)"></iframe></div>
+          <div class="isv-pair"><img src="./static/images/interactive_steering_vis/13--put_the_black_bowl_at_the_front_on_the_plate--23--0050.png" loading="lazy" alt="put the black bowl at the front on the plate (frame 0050)"><iframe src="./static/images/interactive_steering_vis/13--put_the_black_bowl_at_the_front_on_the_plate--23--0050.html" loading="lazy" title="put the black bowl at the front on the plate (frame 0050)"></iframe></div>
+          <div class="isv-pair"><img src="./static/images/interactive_steering_vis/13--put_the_black_bowl_at_the_front_on_the_plate--23--0080.png" loading="lazy" alt="put the black bowl at the front on the plate (frame 0080)"><iframe src="./static/images/interactive_steering_vis/13--put_the_black_bowl_at_the_front_on_the_plate--23--0080.html" loading="lazy" title="put the black bowl at the front on the plate (frame 0080)"></iframe></div>
+          </div>
+        </div>
+        <div class="isv-task">
+          <div class="isv-task-title"><span class="tid">Task 40</span> &mdash; put the frying pan on the cabinet shelf</div>
+          <div class="isv-row">
+          <div class="isv-pair"><img src="./static/images/interactive_steering_vis/40--put_the_frying_pan_on_the_cabinet_shelf--25--0010.png" loading="lazy" alt="put the frying pan on the cabinet shelf (frame 0010)"><iframe src="./static/images/interactive_steering_vis/40--put_the_frying_pan_on_the_cabinet_shelf--25--0010.html" loading="lazy" title="put the frying pan on the cabinet shelf (frame 0010)"></iframe></div>
+          <div class="isv-pair"><img src="./static/images/interactive_steering_vis/40--put_the_frying_pan_on_the_cabinet_shelf--25--0100.png" loading="lazy" alt="put the frying pan on the cabinet shelf (frame 0100)"><iframe src="./static/images/interactive_steering_vis/40--put_the_frying_pan_on_the_cabinet_shelf--25--0100.html" loading="lazy" title="put the frying pan on the cabinet shelf (frame 0100)"></iframe></div>
+          <div class="isv-pair"><img src="./static/images/interactive_steering_vis/40--put_the_frying_pan_on_the_cabinet_shelf--25--0170.png" loading="lazy" alt="put the frying pan on the cabinet shelf (frame 0170)"><iframe src="./static/images/interactive_steering_vis/40--put_the_frying_pan_on_the_cabinet_shelf--25--0170.html" loading="lazy" title="put the frying pan on the cabinet shelf (frame 0170)"></iframe></div>
+          </div>
+        </div>
+        <div class="isv-task">
+          <div class="isv-task-title"><span class="tid">Task 47</span> &mdash; pick up the cream cheese box and put it in the basket</div>
+          <div class="isv-row">
+          <div class="isv-pair"><img src="./static/images/interactive_steering_vis/47--pick_up_the_cream_cheese_box_and_put_it_in_the_basket--43--0010.png" loading="lazy" alt="pick up the cream cheese box and put it in the basket (frame 0010)"><iframe src="./static/images/interactive_steering_vis/47--pick_up_the_cream_cheese_box_and_put_it_in_the_basket--43--0010.html" loading="lazy" title="pick up the cream cheese box and put it in the basket (frame 0010)"></iframe></div>
+          <div class="isv-pair"><img src="./static/images/interactive_steering_vis/47--pick_up_the_cream_cheese_box_and_put_it_in_the_basket--43--0055.png" loading="lazy" alt="pick up the cream cheese box and put it in the basket (frame 0055)"><iframe src="./static/images/interactive_steering_vis/47--pick_up_the_cream_cheese_box_and_put_it_in_the_basket--43--0055.html" loading="lazy" title="pick up the cream cheese box and put it in the basket (frame 0055)"></iframe></div>
+          <div class="isv-pair"><img src="./static/images/interactive_steering_vis/47--pick_up_the_cream_cheese_box_and_put_it_in_the_basket--43--0090.png" loading="lazy" alt="pick up the cream cheese box and put it in the basket (frame 0090)"><iframe src="./static/images/interactive_steering_vis/47--pick_up_the_cream_cheese_box_and_put_it_in_the_basket--43--0090.html" loading="lazy" title="pick up the cream cheese box and put it in the basket (frame 0090)"></iframe></div>
+          </div>
+        </div>
+        <div class="isv-task">
+          <div class="isv-task-title"><span class="tid">Task 66</span> &mdash; put the red mug on the right plate</div>
+          <div class="isv-row">
+          <div class="isv-pair"><img src="./static/images/interactive_steering_vis/66--put_the_red_mug_on_the_right_plate--24--0020.png" loading="lazy" alt="put the red mug on the right plate (frame 0020)"><iframe src="./static/images/interactive_steering_vis/66--put_the_red_mug_on_the_right_plate--24--0020.html" loading="lazy" title="put the red mug on the right plate (frame 0020)"></iframe></div>
+          <div class="isv-pair"><img src="./static/images/interactive_steering_vis/66--put_the_red_mug_on_the_right_plate--24--0090.png" loading="lazy" alt="put the red mug on the right plate (frame 0090)"><iframe src="./static/images/interactive_steering_vis/66--put_the_red_mug_on_the_right_plate--24--0090.html" loading="lazy" title="put the red mug on the right plate (frame 0090)"></iframe></div>
+          <div class="isv-pair"><img src="./static/images/interactive_steering_vis/66--put_the_red_mug_on_the_right_plate--24--0105.png" loading="lazy" alt="put the red mug on the right plate (frame 0105)"><iframe src="./static/images/interactive_steering_vis/66--put_the_red_mug_on_the_right_plate--24--0105.html" loading="lazy" title="put the red mug on the right plate (frame 0105)"></iframe></div>
+          </div>
+        </div>
+        </div>
+      </details>
+    </div>
+  </div>
+</section>
+
+
+<section class="section is-light">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 has-text-centered" id="zero-shot">Zero-Shot Flow Reversal Steering</h2>
+
+    <div class="video-wrapper" style="margin: 0 auto 2rem;">
+      <video class="overview-video" controls autoplay muted loop playsinline>
+        <source src="./static/videos/section_vids/1_ZeroShot_FRS.mp4" type="video/mp4">
+      </video>
+    </div>
+
+    <p class="content has-text-justified">
+      <span class="frs">FRS</span> converts coarse actions into better fine-grained actions from the generalist policy's prior. The simplest way to use <span class="frs">FRS</span> is to directly execute these refined actions without any training. The <strong>zero-shot FRS</strong> inference loop involves: (1) querying a reasoner (e.g. human or VLM) for a coarse reference action, (2) passing the reference action through flow reversal to find the corresponding noise, and (3) denoising this noise to get the final action to execute at each step.
+    </p>
+    <p class="content has-text-justified">
+      We make use of the <a href="https://deepmind.google/models/gemini-robotics/">Gemini-ER-1.6 VLM</a> to scalably produce semantically-meaningful coarse directional reference actions for evaluation in the LIBERO simulator.
+    </p>
+    <br/>
+
+    <div class="sim-carousel">
+      <div class="sim-carousel-stage">
+        <button type="button" class="sim-carousel-arrow sim-carousel-prev" id="sim-prev" aria-label="Previous tasks">
+          <i class="fas fa-chevron-left"></i>
+        </button>
+        <div class="sim-carousel-viewport">
+          <div class="sim-carousel-track" id="sim-carousel-track"></div>
+        </div>
+        <button type="button" class="sim-carousel-arrow sim-carousel-next" id="sim-next" aria-label="Next tasks">
+          <i class="fas fa-chevron-right"></i>
+        </button>
+      </div>
+      <div id="sim-rollout-counter" class="sim-carousel-dots"></div>
+    </div>
+    <p class="sim-carousel-cap">Zero-shot <span class="frs">FRS</span> allows a VLM to guide the generalist policy based on its semantic reasonings, raising performance across LIBERO.</p>
+    <br/>
+
+    <div class="content has-text-justified figure-wrap-block">
+      <figure class="figure-float figure-float-right figure-half">
+        <img src="./static/images/figures/LiberoZeroShotResults.png"
+             alt="Zero-shot FRS improves over the base VLA across LIBERO tasks.">
+        <figcaption class="figure-caption">
+          Zero-shot <span class="frs">FRS</span> converts coarse VLM actions into effective robot actions, outperforming the base policy and prior steering methods.
+        </figcaption>
+      </figure>
+      <p>
+        Zero-shot <span class="frs">FRS</span> outperforms the base VLA across LIBERO. On hard tasks where the base policy achieves &le; 2% success, <strong>11 of 42</strong> tasks gain at least <strong>10%</strong> absolute success rate with zero-shot <span class="frs">FRS</span>. Other steering baselines only boost 3 or 4 such tasks in this way, suggesting FRS is better in low-success regimes which are especially hard for generalist improvement. <span class="frs">FRS</span> also outperforms directly executing VLM actions, showing that flow reversal <i>refines</i> the coarse reference actions, rather than simply reconstructing them.
+      </p>
+    </div>
+
+    <br>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 has-text-centered" id="dsbc">Diffusion Steering via Behavioral Cloning (DSBC)</h2>
+
+    <div class="video-wrapper" style="margin: 0 auto 2rem;">
+      <video class="overview-video" controls autoplay muted loop playsinline>
+        <source src="./static/videos/section_vids/2_DSBC.mp4" type="video/mp4">
+      </video>
+    </div>
+
+    <p class="content has-text-justified">
+      Flow policies can be steered via small auxiliary noise policies, which output noises which the generalist flow policy maps to good actions. However, finding good noises can be challenging &mdash; <a href="https://arxiv.org/pdf/2506.15799">past works like Diffusion Steering via Reinforcement Learning (DSRL)</a> require trial-and-error and Q-learning to find good noises. In contrast, flow reversal rapidly and scalably identifies good noises when simply given reference actions. 
+    </p>
+    <p class="content has-text-justified">
+      Thus, flow reversal enables training noise-steering policies via <i>supervised learning</i>, rather than expensive reinforcement learning. We naturally call this <strong>Diffusion Steering via Behavioral Cloning (DSBC)</strong>.
+    </p>
+
+    <br>
+    <h3 class="title is-4">Real-World (DROID)</h3>
+    <div class="sim-carousel">
+      <div class="sim-carousel-stage">
+        <button type="button" class="sim-carousel-arrow sim-carousel-prev" id="real-prev" aria-label="Previous task">
+          <i class="fas fa-chevron-left"></i>
+        </button>
+        <div class="sim-carousel-viewport">
+          <div class="sim-carousel-track" id="real-carousel-track"></div>
+        </div>
+        <button type="button" class="sim-carousel-arrow sim-carousel-next" id="real-next" aria-label="Next task">
+          <i class="fas fa-chevron-right"></i>
+        </button>
+      </div>
+      <div id="real-rollout-counter" class="sim-carousel-dots"></div>
+    </div>
+    <p class="sim-carousel-cap">Noise policies trained with DSBC can steer the generalist VLA on real-world DROID tasks.</p>
+
+    <br>
+    <img class="figure-full"
+         src="./static/images/figures/DroidResults.png"
+         alt="Real-world DSBC results showing 80% success vs 20% base VLA on six DROID tasks.">
+    <p class="figure-caption has-text-centered">
+      DSBC improves real-world task performance by training on FRS data.
+    </p>
+
+    <br>
+    <div class="content has-text-justified">
+      <p>
+        DSBC trained on 10 successful human-steered <span class="frs">FRS</span> rollouts per task significantly outperforms the base π<sub>0.5</sub> VLA on six DROID tasks. Standard BC with an equivalent flow policy completely fails in this data regime. 
+      </p>
+    </div>
+
+    
+
+    <br>
+    <div class="offline-videos">
+      <div class="offline-main">
+        <div class="video-aspect offline-main-aspect">
+          <video controls autoplay muted loop playsinline
+                 src="./static/videos/real/offline_hang_the_tape_on_the_black_stand.mp4"></video>
+        </div>
+        <p class="method-label ours">Offline DSBC (Ours)</p>
+      </div>
+      <div class="offline-stack">
+        <div class="offline-stack-cell">
+          <div class="video-aspect ar169">
+            <video controls autoplay muted loop playsinline
+                   src="./static/videos/real_base/offline_hang_the_tape_on_the_black_stand.mp4"></video>
+          </div>
+          <p class="method-label">Base VLA</p>
+        </div>
+        <div class="offline-stack-cell">
+          <div class="video-aspect ar169">
+            <video controls autoplay muted loop playsinline
+                   src="./static/videos/real_diffusion_bc/offline_hang_the_tape_on_the_black_stand.mp4"></video>
+          </div>
+          <p class="method-label">Standard Flow BC</p>
+        </div>
+      </div>
+    </div>
+    <p class="figure-caption has-text-centered">
+      Offline DSBC (Ours) solves the precise tape-hanging task, where the base VLA and standard flow BC fail.
+    </p>
+
+    <br>
+    <div class="content has-text-justified figure-wrap-block">
+      <figure class="figure-float figure-float-right figure-half">
+        <img src="./static/images/figures/OfflineBC_DROID.png"
+             alt="Offline DSBC results on DROID tasks.">
+        <figcaption class="figure-caption">
+          DSBC can also be trained fully offline from a fixed dataset of teleoperated trajectories.
+        </figcaption>
+      </figure>
+
+      <p>
+        Alternatively, DSBC can also be used with standard <i>offline</i> robotic demonstration data, e.g., collected via teleoperation. Flow reversal can augment each frame with the noise that approximately maps to the corresponding action chunk, then the DSBC noise policy can be trained on this augmented dataset. We demonstrate this on a more precise tape hanging task, training on 20 teleoperated demonstrations.
+      </p>
+    </div>
+
+
+    <br>
+    <h3 class="title is-4">Simulation (LIBERO)</h3>
+
+    <div class="content has-text-justified figure-wrap-block">
+      <figure class="figure-float figure-float-left figure-half">
+        <img src="./static/images/figures/LiberoBCResults.png"
+             alt="DSBC distills FRS trajectories to match zero-shot FRS performance on LIBERO.">
+        <figcaption class="figure-caption">
+          DSBC on latent noise actions matches zero-shot <span class="frs">FRS</span> and beats standard BC on robot actions.
+        </figcaption>
+      </figure>
+
+      <p>
+        We also evaluate DSBC on LIBERO, where it distills the performance gains of zero-shot VLM FRS on 15 tasks, outperforming standard BC. DSBC is also highly efficient: each noise policy trains in under <strong>1 minute</strong> using ~<strong>1 GB</strong> of GPU memory, without loading the full VLA. 
+      </p>
+      <p>
+        We hypothesize that when the noise policy enters out-of-distribution states, the VLA maps its outputs back to reasonable in-distribution actions, providing implicit robustness against compounding error.
+      </p>
+    </div>
+  </div>
+</section>
+
+
+<section class="section is-light">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 has-text-centered" id="dsrl">Diffusion Steering via Reinforcement Learning (DSRL) + <span class="frs">FRS</span></h2>
+
+    <div class="video-wrapper" style="margin: 0 auto 2rem;">
+      <video class="overview-video" controls autoplay muted loop playsinline>
+        <source src="./static/videos/section_vids/3_DSRL-FRS.mp4" type="video/mp4">
+      </video>
+    </div>
+
+    <p class="content has-text-justified">
+      Bootstrapping DSRL with <span class="frs">FRS</span> trajectories enables faster learning and higher final success on hard tasks. We propose two simple augmentations for <strong>DSRL + <span class="frs">FRS</span></strong>: (1) prefilling the replay buffer with zero-shot <span class="frs">FRS</span> rollouts and (2) adding a BC auxiliary loss on successful trajectories' noise actions.
+    </p>
+
+    <div class="content has-text-justified">
+      <img class="figure-full"
+         src="./static/images/figures/LiberoRLResults.png"
+         alt="DSRL plus FRS outperforms standard DSRL on LIBERO tasks.">
+      <p class="figure-caption has-text-centered">
+        <strong>Left:</strong> DSRL + <span class="frs">FRS</span> on 15 tasks with effective zero-shot steering.<br/>
+        <strong>Right:</strong> on 10 hard tasks where <span class="frs">FRS</span> and the base policy both perform poorly, using even one <span class="frs">FRS</span> success drastically improves RL.
+      </p>
+      <p>
+        On 15 LIBERO-90 tasks, it learns faster and reaches higher final success than standard DSRL and PLD-style residual RL. On 10 harder tasks where the base VLA gets ~0% and zero-shot <span class="frs">FRS</span> reaches only 8%, <b>even a single successful steered trajectory enables DSRL to learn substantially faster and better</b>. By directing the learner toward semantically-meaningful behaviors early in training, DSRL + <span class="frs">FRS</span> improves performance in the sparse-reward regime where standard generalist RL struggles.
+      </p>
+    </div>
+
+    <div class="rl-vidbox">
+      <div class="rl-vidrow">
+        <div class="rl-vid">
+          <div class="video-aspect"><video src="./static/videos/sim_rl/0_t52_fail.mp4" controls autoplay muted loop playsinline></video></div>
+          <p class="rl-step fail">Step 0</p>
+        </div>
+        <div class="rl-vid">
+          <div class="video-aspect"><video src="./static/videos/sim_rl/50000_t52_fail.mp4" controls autoplay muted loop playsinline></video></div>
+          <p class="rl-step fail">Step 50K</p>
+        </div>
+        <div class="rl-vid">
+          <div class="video-aspect"><video src="./static/videos/sim_rl/100000_t52_success.mp4" controls autoplay muted loop playsinline></video></div>
+          <p class="rl-step success">Step 100K</p>
+        </div>
+        <div class="rl-vid">
+          <div class="video-aspect"><video src="./static/videos/sim_rl/150000_t52_success.mp4" controls autoplay muted loop playsinline></video></div>
+          <p class="rl-step success">Step 150K</p>
+        </div>
+        <div class="rl-vid">
+          <div class="video-aspect"><video src="./static/videos/sim_rl/200000_t52_success.mp4" controls autoplay muted loop playsinline></video></div>
+          <p class="rl-step success">Step 200K</p>
+        </div>
+      </div>
+    </div>
+    <p class="rl-caption">
+      As an example, DSRL + <span class="frs">FRS</span> learns on Task 52: <em>pick up the milk and put it in the basket</em>, whereas standard DSRL completely fails, as the base VLA struggles to solve the task without semantic steering from VLMs.
+    </p>
+
+  </div>
+</section>
+
+
+<section class="section" id="BibTeX">
+  <div class="container is-max-desktop content">
+    <h2 class="title">BibTeX</h2>
+    <pre><code>@article{tang2026frs,
+  author  = {Andy Tang and William Chen and Andrew Wagenmaker and Chelsea Finn and Sergey Levine},
+  title   = {Improving Robotic Generalist Policies via Flow Reversal Steering},
+  year    = {2026},
+}</code></pre>
+  </div>
+</section>
+
+
+<footer class="footer">
+  <div class="container">
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <div class="content">
+          <p>
+            Website borrowed from <a href="https://nerfies.github.io">NeRFies</a> under a
+            <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 International</a> License.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="./static/js/frs_roundtrip.js"></script>
+<script defer src="./static/js/frs_teaser1d.js"></script>
+
+</body>
+</html>

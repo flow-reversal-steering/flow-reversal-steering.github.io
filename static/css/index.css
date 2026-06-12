@@ -1,0 +1,838 @@
+body {
+  font-family: 'Noto Sans', sans-serif;
+}
+
+/* Larger main body text. Figure captions keep their own explicit size, so they
+   are unaffected. */
+.content {
+  font-size: 1.15rem;
+}
+
+.offline-text {
+  font-size: 1.15rem;
+}
+
+
+.footer .icon-link {
+    font-size: 25px;
+    color: #000;
+}
+
+.link-block a {
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.dnerf,
+.frs {
+  font-variant: small-caps;
+}
+
+.teaser-figure {
+  width: 100%;
+  border-radius: 10px;
+  margin-bottom: 2rem;
+  display: block;
+}
+
+.video-placeholder {
+  aspect-ratio: 16 / 9;
+  background: #f0f0f0;
+  border: 2px dashed #ccc;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #888;
+  font-size: 0.95rem;
+  text-align: center;
+  padding: 1rem;
+}
+
+.video-placeholder i {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.stats-box {
+  background: #f5f5f5;
+  border-radius: 10px;
+  padding: 1.25rem;
+  margin: 1rem 0;
+}
+
+.stats-box ul {
+  margin-bottom: 0;
+}
+
+.figure-caption {
+  font-size: 0.9rem;
+  color: #555;
+  margin-top: 0.5rem;
+}
+
+.video-grid {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.video-grid-2col {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.5rem 2rem;
+}
+
+.video-grid-3col {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.5rem 2rem;
+}
+
+@media screen and (max-width: 768px) {
+  .video-grid-2col,
+  .video-grid-3col {
+    grid-template-columns: 1fr;
+  }
+}
+
+.video-aspect {
+  width: 100%;
+  background: #111;
+  border-radius: 10px;
+  overflow: hidden;
+  line-height: 0;
+  position: relative;   /* anchor injected overlays (e.g. Video Speed Controller) to the video box */
+}
+
+.video-card .video-aspect video {
+  width: 100%;
+  height: auto;
+  display: block;
+  vertical-align: top;
+}
+
+.video-card-caption {
+  margin-top: 0.75rem;
+  margin-bottom: 0;
+  text-align: center;
+  font-size: 1rem;
+}
+
+/* Simulation: 3-up sliding carousel inside a grey box */
+.sim-carousel {
+  position: relative;
+  margin-top: 1.25rem;
+  padding: 1.5rem;
+  background: #f0f0f2;
+  border-radius: 14px;
+}
+
+.sim-carousel-viewport {
+  min-width: 0;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    #000 14%,
+    #000 86%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    #000 14%,
+    #000 86%,
+    transparent 100%
+  );
+}
+
+.sim-carousel-track {
+  display: flex;
+  transition: transform 0.35s ease;
+  will-change: transform;
+}
+
+.sim-carousel-card {
+  flex: 0 0 64%;
+  max-width: 64%;
+  padding: 0 0.6rem;
+  box-sizing: border-box;
+  opacity: 0.45;
+  transition: opacity 0.35s ease;
+}
+
+.sim-carousel-card.is-active {
+  opacity: 1;
+}
+
+.sim-carousel-card .sim-video-aspect {
+  min-height: 0;
+  max-width: 100%;
+  aspect-ratio: 1 / 1;
+}
+
+.sim-carousel-card .video-card-caption {
+  margin-top: 0.6rem;
+  font-size: 0.95rem;
+}
+
+.sim-carousel-card:not(.is-active) .video-card-caption {
+  visibility: hidden;
+}
+
+/* Multi-method carousel card: main "Ours" clip full width, the two comparison
+   clips half width/height in a row underneath. All clips are 16:9. */
+.sim-carousel-card .video-aspect.ar169 {
+  aspect-ratio: 16 / 9;
+  max-width: 100%;
+}
+
+.rollout-cell .video-aspect.ar169 video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  background: #000;
+}
+
+.rollout-variants {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+  margin-top: 0.6rem;
+}
+
+.method-label {
+  margin: 0.4rem 0 0;
+  text-align: center;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #555;
+}
+
+.rollout-variant .method-label {
+  font-size: 0.78rem;
+}
+
+.method-label.ours {
+  color: #6a4fa3;
+}
+
+.sim-carousel-card:not(.is-active) .method-label {
+  visibility: hidden;
+}
+
+.sim-carousel-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  border: none;
+  background: rgba(40, 40, 40, 0.85);
+  color: #fff;
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease, opacity 0.15s ease;
+}
+
+.sim-carousel-stage {
+  position: relative;
+}
+
+.sim-carousel-prev {
+  left: 0;
+}
+
+.sim-carousel-next {
+  right: 0;
+}
+
+.sim-carousel-arrow:hover {
+  background: rgba(40, 40, 40, 0.95);
+}
+
+.sim-carousel-arrow:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.sim-carousel-dots {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 0.45rem;
+  margin-top: 0.85rem;
+}
+
+.sim-dot {
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: #c6c6cf;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.sim-dot:hover {
+  background: #9a9aa6;
+}
+
+.sim-dot.is-active {
+  background: #555;
+  transform: scale(1.35);
+}
+
+.sim-carousel-cap {
+  margin: 1.1rem auto 0;
+  max-width: 46rem;
+  text-align: center;
+  font-size: 0.95rem;
+  line-height: 1.45;
+  color: #555;
+}
+
+@media screen and (max-width: 768px) {
+  .sim-carousel {
+    padding: 1rem 0.5rem;
+  }
+  .sim-carousel-card {
+    flex-basis: 80%;
+    max-width: 80%;
+    padding: 0 0.3rem;
+  }
+  .sim-carousel-card .video-card-caption {
+    font-size: 0.82rem;
+  }
+  .sim-carousel-arrow {
+    width: 2.4rem;
+    height: 2.4rem;
+    font-size: 0.95rem;
+  }
+  .sim-carousel-prev {
+    left: 0;
+  }
+  .sim-carousel-next {
+    right: 0;
+  }
+}
+
+.sim-video-stage {
+  margin-top: 1.5rem;
+}
+
+.sim-video-aspect {
+  width: 100%;
+  max-width: 56rem;
+  margin: 0 auto;
+  aspect-ratio: 16 / 9;
+  min-height: 320px;
+}
+
+.sim-video-aspect video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  background: #000;
+}
+
+#sim-rollout-caption {
+  margin-top: 1rem;
+  font-size: 1.05rem;
+}
+
+.button.is-disabled-coming-soon {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Overview video (Steerable Policies style) */
+.overview-video-section {
+  padding-top: 0;
+  padding-bottom: 2rem;
+}
+
+.video-toggle-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.video-toggle-wrapper .toggle-container {
+  position: relative;
+  margin-top: 1rem;
+  margin-bottom: 0;
+  width: 350px;
+  max-width: 100%;
+}
+
+.video-wrapper {
+  width: 100%;
+  max-width: 960px;
+  position: relative;   /* anchor injected video overlays to the video box */
+}
+
+.overview-video {
+  width: 100%;
+  height: auto;
+  border-radius: 10px;
+  display: block;
+  background: #000;
+}
+
+.overview-video.is-hidden {
+  display: none;
+}
+
+.overview-video-placeholder {
+  aspect-ratio: 16 / 9;
+  background: #f0f0f0;
+  border: 2px dashed #ccc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #888;
+  font-size: 1rem;
+  text-align: center;
+  padding: 1.5rem;
+}
+
+.overview-video-placeholder i {
+  font-size: 2.5rem;
+  margin-bottom: 0.75rem;
+  display: block;
+  color: #aaa;
+}
+
+#video-toggle {
+  display: none;
+}
+
+.video-mode-slider {
+  display: flex;
+  position: relative;
+  background: #ccc;
+  border-radius: 25px;
+  cursor: pointer;
+  overflow: hidden;
+  user-select: none;
+  padding: 5px;
+  margin: 0;
+}
+
+.video-mode-slider::after {
+  content: '';
+  position: absolute;
+  top: 5px;
+  left: var(--capsule-left, 5px);
+  width: var(--capsule-width, calc(50% - 10px));
+  height: calc(100% - 10px);
+  background: #3273dc;
+  border-radius: 25px;
+  z-index: 0;
+  transition: left 0.3s ease, width 0.3s ease;
+}
+
+.video-mode-slider .toggle-label {
+  flex: 1;
+  text-align: center;
+  font-family: 'Google Sans', sans-serif;
+  font-size: 0.95rem;
+  position: relative;
+  z-index: 1;
+  padding: 8px 12px;
+  white-space: nowrap;
+  transition: color 0.3s ease, font-weight 0.3s ease;
+  cursor: pointer;
+}
+
+#video-toggle:checked + .video-mode-slider .toggle-label.off {
+  color: rgb(100, 100, 100);
+  font-weight: 400;
+}
+
+#video-toggle:checked + .video-mode-slider .toggle-label.on {
+  color: white;
+  font-weight: 600;
+}
+
+#video-toggle:not(:checked) + .video-mode-slider .toggle-label.off {
+  color: white;
+  font-weight: 600;
+}
+
+#video-toggle:not(:checked) + .video-mode-slider .toggle-label.on {
+  color: rgb(100, 100, 100);
+  font-weight: 400;
+}
+
+.publication-subtitle {
+  font-family: 'Google Sans', sans-serif;
+  margin-top: 0.25rem;
+  margin-bottom: 1rem;
+}
+
+.tagline {
+  font-family: 'Google Sans', sans-serif;
+  font-weight: 500;
+  line-height: 1.5;
+  max-width: 52rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.figure-wrap-block::after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+.figure-float {
+  margin-bottom: 1rem;
+}
+
+.figure-float img {
+  width: 100%;
+  border-radius: 10px;
+}
+
+.figure-float-right {
+  float: right;
+  width: 50%;
+  margin-left: 1.5rem;
+}
+
+.figure-float-left {
+  float: left;
+  width: 50%;
+  margin-right: 1.5rem;
+}
+
+.figure-float figcaption {
+  text-align: center;
+}
+
+.figure-full {
+  width: 100%;
+  border-radius: 10px;
+  display: block;
+}
+
+@media screen and (max-width: 768px) {
+  .figure-float-right,
+  .figure-float-left {
+    float: none;
+    width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+  }
+}
+
+/* Offline DSBC qualitative rollouts: main "Ours" clip on the left, the two
+   comparison clips stacked on the right; the block spans the full content width.
+   The columns are equal height (align-items: stretch), so the bottom labels
+   ("Offline DSBC (Ours)" / "Standard Flow BC") line up. The main clip's box
+   flex-grows to fill its column, making it as tall as the whole right column
+   minus its own label = [base clip + "Base VLA" label + bottom clip]. */
+.offline-videos {
+  display: flex;
+  align-items: stretch;
+  gap: 0.8rem;
+  width: 100%;
+  margin: 0.5rem auto 0;
+}
+
+.offline-main {
+  flex: 2 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.offline-main .offline-main-aspect {
+  flex: 1 1 0;       /* grow to fill the (taller) right-column height */
+  min-height: 0;
+}
+
+.offline-stack {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.offline-stack-cell {
+  display: flex;
+  flex-direction: column;
+}
+
+.offline-stack .video-aspect.ar169 { aspect-ratio: 16 / 9; }
+
+.offline-videos .video-aspect video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  background: #000;
+}
+
+.offline-text {
+  max-width: 52rem;
+  margin: 0.5rem auto 0;
+  text-align: justify;
+}
+
+@media screen and (max-width: 768px) {
+  .offline-videos { flex-direction: column; align-items: stretch; }
+  .offline-main, .offline-stack { flex: 0 0 auto; width: 100%; }
+  .offline-main .offline-main-aspect { aspect-ratio: 16 / 9; flex: 0 0 auto; }
+}
+
+
+.teaser .hero-body {
+  padding-top: 0;
+  padding-bottom: 3rem;
+}
+
+.teaser {
+  font-family: 'Google Sans', sans-serif;
+}
+
+
+.publication-title {
+}
+
+.publication-banner {
+  max-height: parent;
+
+}
+
+.publication-banner video {
+  position: relative;
+  left: auto;
+  top: auto;
+  transform: none;
+  object-fit: fit;
+}
+
+.publication-header .hero-body {
+}
+
+.publication-title {
+    font-family: 'Google Sans', sans-serif;
+}
+
+.publication-authors {
+    font-family: 'Google Sans', sans-serif;
+}
+
+.publication-venue {
+    color: #555;
+    width: fit-content;
+    font-weight: bold;
+}
+
+.publication-awards {
+    color: #ff3860;
+    width: fit-content;
+    font-weight: bolder;
+}
+
+.publication-authors {
+}
+
+.publication-authors a {
+   color: hsl(204, 86%, 53%) !important;
+}
+
+.publication-authors a:hover {
+    text-decoration: underline;
+}
+
+.author-block {
+  display: inline-block;
+}
+
+.publication-banner img {
+}
+
+.publication-authors {
+  /*color: #4286f4;*/
+}
+
+.publication-video {
+    position: relative;
+    width: 100%;
+    height: 0;
+    padding-bottom: 56.25%;
+
+    overflow: hidden;
+    border-radius: 10px !important;
+}
+
+.publication-video iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.publication-body img {
+}
+
+.results-carousel {
+  overflow: hidden;
+}
+
+.results-carousel .item {
+  margin: 5px;
+  overflow: hidden;
+  border: 1px solid #bbb;
+  border-radius: 10px;
+  padding: 0;
+  font-size: 0;
+}
+
+.results-carousel video {
+  margin: 0;
+}
+
+
+.interpolation-panel {
+  background: #f5f5f5;
+  border-radius: 10px;
+}
+
+.interpolation-panel .interpolation-image {
+  width: 100%;
+  border-radius: 5px;
+}
+
+.interpolation-video-column {
+}
+
+.interpolation-panel .slider {
+  margin: 0 !important;
+}
+
+.interpolation-panel .slider {
+  margin: 0 !important;
+}
+
+#interpolation-image-wrapper {
+  width: 100%;
+}
+#interpolation-image-wrapper img {
+  border-radius: 5px;
+}
+
+/* ---- hovering table of contents (left rail) ---------------------------- */
+html { scroll-behavior: smooth; }
+h2[id], h3[id] { scroll-margin-top: 1.5rem; }
+
+#toc-nav {
+  position: fixed;
+  left: 1.75rem;
+  top: 30%;
+  transform: translateY(-50%);
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  gap: 1.6rem;
+  font-family: 'Roboto Mono', monospace;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+#toc-nav::before {            /* the line connecting the circles */
+  content: "";
+  position: absolute;
+  left: 8px;
+  top: 9px;
+  bottom: 9px;
+  width: 2px;
+  background: #dcdcdc;
+  z-index: -1;
+}
+
+.toc-item { display: flex; align-items: center; gap: 0.65rem; text-decoration: none; }
+
+.toc-dot-wrap { width: 18px; height: 18px; flex: 0 0 18px; display: flex; align-items: center; justify-content: center; }
+
+.toc-dot {
+  width: 11px; height: 11px; border-radius: 50%;
+  background: #fff; border: 2px solid #c2c2c2; box-sizing: border-box;
+  transition: width 0.2s ease, height 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+}
+
+.toc-label {                  /* always shown, small + greyed; the active one pops */
+  font-size: 0.72rem; font-weight: 600; color: #b4b4b4; white-space: nowrap;
+  transition: color 0.2s ease, font-weight 0.2s ease;
+}
+
+.toc-item:hover .toc-dot { border-color: #7a6db0; }
+.toc-item:hover .toc-label { color: #666; }
+
+.toc-item.active .toc-dot { width: 17px; height: 17px; background: #7a6db0; border-color: #7a6db0; }
+.toc-item.active .toc-label { color: #7a6db0; font-weight: 700; }
+
+@media (max-width: 1100px) { #toc-nav { display: none; } }
+
+/* ---- DSRL example: a static (non-carousel) row of 5 rollout videos ------ */
+.rl-vidbox {
+  margin: 1.5rem 0 0.5rem;
+  padding: 1.5rem;
+  background: #f0f0f2;
+  border-radius: 14px;
+}
+
+.rl-vidrow {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.7rem;
+}
+
+.rl-vid { display: flex; flex-direction: column; }
+
+.rl-vid .video-aspect {
+  aspect-ratio: 1 / 1;
+  background: #111;
+  border-radius: 8px;
+  overflow: hidden;
+  line-height: 0;
+}
+
+.rl-vid video { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.rl-step {
+  margin: 0.5rem 0 0;
+  text-align: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+  font-family: 'Roboto Mono', monospace;
+}
+.rl-step.fail { color: #d64545; }
+.rl-step.success { color: #3f9a47; }
+
+.rl-caption {
+  margin: 1.1rem auto 0;
+  max-width: 48rem;
+  text-align: center;
+  font-size: 0.92rem;
+  color: #555;
+}
+
+@media (max-width: 768px) { .rl-vidrow { grid-template-columns: repeat(2, 1fr); } }

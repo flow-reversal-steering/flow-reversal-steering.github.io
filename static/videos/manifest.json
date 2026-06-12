@@ -1,0 +1,96 @@
+{
+  "realworld": [
+    {
+      "file": "hang_towel.mp4",
+      "label": "Hang towel on stand",
+      "src": "hang_the_towel_on_the_black_stand_1.mp4"
+    },
+    {
+      "file": "drawer_carrot.mp4",
+      "label": "Open drawer, put carrot",
+      "src": "open_the_drawer_and_put_the_carrot_in_it_1.mp4"
+    },
+    {
+      "file": "bread_plate.mp4",
+      "label": "Put bread on plate",
+      "src": "put_the_bread_on_the_plate_1.mp4"
+    },
+    {
+      "file": "egg_steamer.mp4",
+      "label": "Put egg in steamer",
+      "src": "put_the_egg_in_the_steamer_basket_1.mp4"
+    },
+    {
+      "file": "plate_table.mp4",
+      "label": "Put plate on table",
+      "src": "put_the_plate_on_the_table_1.mp4"
+    },
+    {
+      "file": "stack_cups.mp4",
+      "label": "Stack cups",
+      "src": "stack_the_cups_on_the_table_1.mp4"
+    }
+  ],
+  "sim": [
+    {
+      "file": "13-True-put_the_black_bowl_at_the_front_on_the_plate-13-epid_22-seed_0.mp4",
+      "label": "put the black bowl at the front on the plate"
+    },
+    {
+      "file": "31-True-put_the_black_bowl_on_top_of_the_cabinet-31-epid_25-seed_0.mp4",
+      "label": "put the black bowl on top of the cabinet"
+    },
+    {
+      "file": "35-True-open_the_microwave-35-epid_10-seed_0.mp4",
+      "label": "open the microwave"
+    },
+    {
+      "file": "41-True-put_the_frying_pan_on_top_of_the_cabinet-41-epid_0-seed_0.mp4",
+      "label": "put the frying pan on top of the cabinet"
+    },
+    {
+      "file": "43-True-put_the_white_bowl_on_top_of_the_cabinet-43-epid_12-seed_0.mp4",
+      "label": "put the white bowl on top of the cabinet"
+    },
+    {
+      "file": "44-True-turn_on_the_stove-44-epid_0-seed_0.mp4",
+      "label": "turn on the stove"
+    },
+    {
+      "file": "49-True-pick_up_the_tomato_sauce_and_put_it_in_the_basket-49-epid_2-seed_0.mp4",
+      "label": "pick up the tomato sauce and put it in the basket"
+    },
+    {
+      "file": "52-True-pick_up_the_milk_and_put_it_in_the_basket-52-epid_42-seed_0.mp4",
+      "label": "pick up the milk and put it in the basket"
+    },
+    {
+      "file": "69-True-put_the_chocolate_pudding_to_the_left_of_the_plate-69-epid_0-seed_0.mp4",
+      "label": "put the chocolate pudding to the left of the plate"
+    },
+    {
+      "file": "73-True-pick_up_the_book_and_place_it_in_the_front_compartment_of_the_caddy-73-epid_12-seed_0.mp4",
+      "label": "pick up the book and place it in the front compartment of the caddy"
+    },
+    {
+      "file": "74-True-pick_up_the_book_and_place_it_in_the_left_compartment_of_the_caddy-74-epid_0-seed_0.mp4",
+      "label": "pick up the book and place it in the left compartment of the caddy"
+    },
+    {
+      "file": "75-True-pick_up_the_book_and_place_it_in_the_right_compartment_of_the_caddy-75-epid_11-seed_0.mp4",
+      "label": "pick up the book and place it in the right compartment of the caddy"
+    },
+    {
+      "file": "78-True-pick_up_the_book_and_place_it_in_the_front_compartment_of_the_caddy-78-epid_45-seed_0.mp4",
+      "label": "pick up the book and place it in the front compartment of the caddy"
+    },
+    {
+      "file": "79-True-pick_up_the_book_and_place_it_in_the_left_compartment_of_the_caddy-79-epid_0-seed_0.mp4",
+      "label": "pick up the book and place it in the left compartment of the caddy"
+    },
+    {
+      "file": "81-True-pick_up_the_book_and_place_it_in_the_front_compartment_of_the_caddy-81-epid_10-seed_0.mp4",
+      "label": "pick up the book and place it in the front compartment of the caddy"
+    }
+  ]
+}
