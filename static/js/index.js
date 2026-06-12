@@ -56,10 +56,15 @@ function initTableOfContents() {
 }
 
 // Hide the native controls (scrubber + replay overlay) once a clip finishes so a
-// done clip just holds its last frame; restore them when it plays again.
+// done clip just holds its last frame -- but bring the bar back on hover so you
+// can still scrub/replay, and restore it when the clip plays again.
 function hideControlsOnEnd(v) {
   v.addEventListener("ended", function() { v.controls = false; });
   v.addEventListener("play", function() { v.controls = true; });
+  v.addEventListener("mouseenter", function() { v.controls = true; });
+  v.addEventListener("mouseleave", function() {
+    if (v.ended) { v.controls = false; }   // re-hide only while finished & idle
+  });
 }
 
 function capitalizeLabel(label) {
